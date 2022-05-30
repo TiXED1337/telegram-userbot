@@ -3,7 +3,6 @@ from pyrogram import client, filters
 from pyrogram.errors import FloodWait
 import config
 import asyncio
-
 app = client.Client('tttt', api_hash=config.api_hash, api_id=config.api_id)
 
 @app.on_message(filters.command('help', '.') & filters.me)
@@ -16,6 +15,7 @@ async def help(_, msg):
 .type - эффект печати
 .chat id - пишет айди чата
 .message id - пишет айди сообщения (нужно ответить на сообщение)
+.purge - удаляет все сообщения до овтета (если в группе то нужны права администратора)
 ''')
 
 @app.on_message(filters.command('zxc', '.') & filters.me)
@@ -60,6 +60,20 @@ async def message_id(_, msg):
     if msg.reply_to_message_id:
         await msg.edit(f'id сообщения: {msg.reply_to_message_id}')
     else: 
+        await msg.edit(f'Нужно ответить на сообщение')
+        await asyncio.sleep(2)
+        await msg.delete()
+
+@app.on_message(filters.command('purge', '.') & filters.me)
+async def purge(_, msg):
+    if msg.reply_to_message:
+        async for message in app.get_chat_history(msg.chat.id):
+            if message.id == msg.reply_to_message_id:
+                await message.delete()
+                break
+            else:
+                await message.delete()
+    else:
         await msg.edit(f'Нужно ответить на сообщение')
         await asyncio.sleep(2)
         await msg.delete()
