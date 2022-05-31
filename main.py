@@ -16,6 +16,7 @@ async def help(_, msg):
 .chat id - пишет айди чата
 .message id - пишет айди сообщения (нужно ответить на сообщение)
 .purge - удаляет все сообщения до овтета (если в группе то нужны права администратора)
+.spam - спам | использование .spam <текст> <кол-во сообщений>
 ''')
 
 @app.on_message(filters.command('zxc', '.') & filters.me)
@@ -77,5 +78,16 @@ async def purge(_, msg):
         await msg.edit(f'Нужно ответить на сообщение')
         await asyncio.sleep(2)
         await msg.delete()
+
+@app.on_message(filters.command('spam', '.') & filters.me)
+async def spam(_, msg):
+    _, text = msg.text.split(' ', maxsplit=1)
+    iterations = int(text.split(' ')[-1])
+    text = text[:-len(str(iterations))]
+    for i in range(iterations):
+        try:
+            await app.send_message(msg.chat.id, text)
+        except FloodWait as f:
+            await asyncio.sleep(f.value)
 
 app.run()
